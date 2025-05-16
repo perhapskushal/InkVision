@@ -1,0 +1,510 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HandScribe - Handwritten OCR Detection</title>
+    <style>
+        :root {
+            --primary: #4F46E5;
+            --primary-light: #818CF8;
+            --secondary: #3B82F6;
+            --dark: #1E293B;
+            --light: #F8FAFC;
+            --gray: #94A3B8;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background-color: var(--light);
+            color: var(--dark);
+        }
+        
+        header {
+            background-color: white;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            padding: 1rem 0;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+        
+        .container {
+            width: 90%;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .logo {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--primary);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .nav-links {
+            display: flex;
+            gap: 2rem;
+        }
+        
+        .nav-links a {
+            text-decoration: none;
+            color: var(--dark);
+            font-weight: 500;
+            transition: color 0.3s;
+        }
+        
+        .nav-links a:hover {
+            color: var(--primary);
+        }
+        
+        .hero {
+            padding: 1rem 0;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+        
+        .hero-content {
+            flex: 1;
+        }
+        
+        .hero-image {
+            flex: 1;
+            text-align: center;
+        }
+        
+        .hero-image img {
+            max-width: 100%;
+            border-radius: 10px;
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+        }
+        
+        h1 {
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+            color: var(--dark);
+        }
+        
+        .subtitle {
+            font-size: 1.2rem;
+            color: var(--gray);
+            margin-bottom: 2rem;
+            line-height: 1.6;
+        }
+        
+        .btn {
+            display: inline-block;
+            padding: 0.8rem 1.5rem;
+            background-color: var(--primary);
+            color: white;
+            border-radius: 5px;
+            text-decoration: none;
+            font-weight: 600;
+            transition: background-color 0.3s;
+            border: none;
+            cursor: pointer;
+        }
+        
+        .btn:hover {
+            background-color: var(--primary-light);
+        }
+        
+        .btn-secondary {
+            background-color: white;
+            color: var(--primary);
+            border: 1px solid var(--primary);
+            margin-left: 1rem;
+        }
+        
+        .btn-secondary:hover {
+            background-color: var(--light);
+        }
+        
+        .features {
+            padding: 4rem 0;
+            background-color: white;
+        }
+        
+        .section-title {
+            text-align: center;
+            margin-bottom: 3rem;
+        }
+        
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+        }
+        
+        .feature-card {
+            background-color: var(--light);
+            padding: 2rem;
+            border-radius: 10px;
+            text-align: center;
+            transition: transform 0.3s;
+        }
+        
+        .feature-card:hover {
+            transform: translateY(-5px);
+        }
+        
+        .feature-icon {
+            font-size: 2.5rem;
+            color: var(--primary);
+            margin-bottom: 1rem;
+        }
+        
+        .feature-title {
+            font-size: 1.2rem;
+            margin-bottom: 1rem;
+        }
+        
+        .feature-desc {
+            color: var(--gray);
+            line-height: 1.6;
+        }
+        
+        .ocr-section {
+            padding: 1rem 0;
+        }
+        
+        .ocr-container {
+            background-color: white;
+            border-radius: 10px;
+            padding: 2rem;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+        
+        .ocr-title {
+            margin-bottom: 2rem;
+            text-align: center;
+        }
+        
+        .upload-container {
+            border: 2px dashed var(--gray);
+            border-radius: 10px;
+            padding: 3rem 2rem;
+            text-align: center;
+            margin-bottom: 2rem;
+            cursor: pointer;
+            transition: border-color 0.3s;
+        }
+        
+        .upload-container:hover {
+            border-color: var(--primary);
+        }
+        
+        .upload-icon {
+            font-size: 2.5rem;
+            color: var(--gray);
+            margin-bottom: 1rem;
+        }
+        
+        .upload-text {
+            color: var(--gray);
+            margin-bottom: 1rem;
+        }
+        
+        /* Remove the language-select class */
+        
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+        }
+        
+        select, input {
+            width: 100%;
+            padding: 0.8rem;
+            border: 1px solid var(--gray);
+            border-radius: 5px;
+            font-size: 1rem;
+        }
+        
+        .hidden {
+            display: none;
+        }
+        .result-box {
+        background: white;
+        padding: 1.5rem;
+        border-radius: 8px;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        margin-top: 2rem;
+        }
+
+        .result-box pre {
+            white-space: pre-wrap;
+            font-family: inherit;
+            margin: 1rem 0;
+            padding: 1rem;
+            background: var(--light);
+            border-radius: 4px;
+        }
+
+        .download-section {
+            margin-top: 1rem;
+            text-align: center;
+        }
+
+        .download-btn {
+            display: inline-block;
+            padding: 0.75rem 1.5rem;
+            background: var(--primary);
+            color: white;
+            text-decoration: none;
+            border-radius: 4px;
+            transition: background 0.3s;
+        }
+
+        .download-btn:hover {
+            background: var(--primary-light);
+        }
+
+        .drag-over {
+            border-color: var(--primary);
+            background: rgba(79, 70, 229, 0.1);
+        }
+        
+        #preview {
+            max-width: 100%;
+            border-radius: 5px;
+            margin-bottom: 1rem;
+        }
+        
+        footer {
+            background-color: var(--dark);
+            color: white;
+            padding: 2rem 0;
+            text-align: center;
+        }
+        
+        .footer-links {
+            display: flex;
+            justify-content: center;
+            gap: 2rem;
+            margin: 1rem 0;
+        }
+        
+        .footer-links a {
+            color: white;
+            text-decoration: none;
+        }
+        
+        .footer-links a:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="container">
+            <nav>
+                <div class="logo">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
+                        <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
+                    </svg>
+                    InkVision
+                </div>
+                <div class="nav-links">
+                    <a href="#home">Home</a>
+                    <a href="#features">Features</a>
+                    <a href="#ocr">OCR Tool</a>
+                    <a href="#about">About</a>
+                </div>
+            </nav>
+        </div>
+    </header>
+    
+    <section class="hero" id="home">
+        <div class="container">
+            <div class="hero-content">
+                <h1>Transform Handwritten Text into Digital Content</h1>
+                <p class="subtitle">Our advanced OCR technology accurately converts handwritten notes, forms, and documents into editable digital text across multiple languages.</p>
+            </div>
+        </div>
+    </section>
+
+    <section class="ocr-section" id="ocr">
+        <div class="container">
+            <div class="ocr-container">
+                <h2 class="ocr-title">Convert Your Handwritten Document</h2>
+                <div class="upload-container" id="uploadArea">
+                    <div class="upload-icon">📄</div>
+                    <p class="upload-text">Drag & drop your document here or click to browse</p>
+                    <p>Supported formats: JPG, PNG, PDF</p>
+                    <input type="file" id="fileInput" class="hidden" accept="image/jpeg,image/png,application/pdf">
+                </div>
+                <div id="previewContainer" class="hidden">
+                    <img id="preview" src="" alt="Document preview">
+                    <button id="removeBtn" class="btn btn-secondary">Remove</button>
+                </div>
+                <!-- Remove the language-select div -->
+                <button id="generateBtn" class="btn" disabled>Generate Text</button>
+            </div>
+        </div>
+    </section>
+    
+    <section class="features" id="features">
+        <div class="container">
+            <h2 class="section-title">Why Choose InkVision?</h2>
+            <div class="features-grid">
+                <div class="feature-card">
+                    <div class="feature-icon">📝</div>
+                    <h3 class="feature-title">High Accuracy</h3>
+                    <p class="feature-desc">Our advanced AI models ensure precise recognition of even difficult handwriting styles.</p>
+                </div>
+               
+                <div class="feature-card">
+                    <div class="feature-icon">⚡</div>
+                    <h3 class="feature-title">Fast Processing</h3>
+                    <p class="feature-desc">Get your digitized text within seconds, saving hours of manual transcription.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+    
+    
+    
+    <footer>
+        <div class="container">
+            <p>&copy; 2025 InkVision. All rights reserved.</p>
+            <div class="footer-links">
+                <a href="#">Privacy Policy</a>
+                <a href="#">Terms of Service</a>
+                <a href="#">Contact Us</a>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        const uploadArea = document.getElementById('uploadArea');
+        const fileInput = document.getElementById('fileInput');
+        const previewContainer = document.getElementById('previewContainer');
+        const preview = document.getElementById('preview');
+        const removeBtn = document.getElementById('removeBtn');
+        const generateBtn = document.getElementById('generateBtn');
+        // Remove languageSelect constant
+        
+        uploadArea.addEventListener('click', () => {
+            fileInput.click();
+        });
+        
+        uploadArea.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            uploadArea.classList.add('drag-over');
+        });
+        
+        uploadArea.addEventListener('dragleave', () => {
+            uploadArea.classList.remove('drag-over');
+        });
+        
+        uploadArea.addEventListener('drop', (e) => {
+            e.preventDefault();
+            uploadArea.classList.remove('drag-over');
+            
+            if (e.dataTransfer.files.length) {
+                handleFile(e.dataTransfer.files[0]);
+            }
+        });
+        
+        fileInput.addEventListener('change', () => {
+            if (fileInput.files.length) {
+                handleFile(fileInput.files[0]);
+            }
+        });
+        
+        removeBtn.addEventListener('click', () => {
+            resetUpload();
+        });
+        
+        function handleFile(file) {
+            const reader = new FileReader();
+            
+            reader.onload = (e) => {
+                preview.src = e.target.result;
+                uploadArea.classList.add('hidden');
+                previewContainer.classList.remove('hidden');
+                generateBtn.disabled = false;
+            };
+            
+            reader.readAsDataURL(file);
+        }
+        
+        function resetUpload() {
+            fileInput.value = '';
+            preview.src = '';
+            uploadArea.classList.remove('hidden');
+            previewContainer.classList.add('hidden');
+            generateBtn.disabled = true;
+        }
+        
+        generateBtn.addEventListener('click', async () => {
+            if (!fileInput.files.length) return;
+    
+            generateBtn.disabled = true;
+            generateBtn.textContent = 'Processing...';
+    
+            const formData = new FormData();
+            formData.append('image', fileInput.files[0]);
+            formData.append('language', 'nep'); // Set Nepali as default language
+    
+            try {
+                const response = await fetch('/process', {
+                    method: 'POST',
+                    body: formData
+                });
+    
+                const data = await response.json();
+    
+                if (data.error) {
+                    throw new Error(data.error);
+                }
+    
+                // Display results
+                const resultContainer = document.createElement('div');
+                resultContainer.className = 'result-box';
+                resultContainer.innerHTML = `
+                    <h3>Recognized Text:</h3>
+                    <pre>${data.text}</pre>
+                    ${data.pdf_url ? `
+                        <div class="download-section">
+                            <a href="${data.pdf_url}" class="download-btn" download>
+                                Download PDF
+                            </a>
+                        </div>
+                    ` : ''}
+                `;
+    
+                // Add result container after the OCR container
+                document.querySelector('.ocr-container').appendChild(resultContainer);
+    
+            } catch (error) {
+                alert('Error: ' + error.message);
+            } finally {
+                generateBtn.disabled = false;
+                generateBtn.textContent = 'Generate Text';
+            }
+        });
+    </script>
+</body>
+</html>
